@@ -506,23 +506,33 @@
 			:filter-args #'mew--advice-filter-args-gnutls-negotiate)
 	    ;;
 	    ;; Override key functions when using a tunnel.
-	    (setq pro (open-network-stream
-		       name buf server port
-		       :type type
-		       :return-list t
-		       :nowait nowait
-		       :always-query-capabilities
-		       (mew-starttls-get-param proto :always-query-capabilities nil)
-		       :capability-command
-		       (mew-starttls-get-param proto :capability-command t)
-		       :end-of-capability
-		       (mew-starttls-get-param proto :end-of-capability t)
-		       :end-of-command
-		       (mew-starttls-get-param proto :end-of-command t)
-		       :success
-		       (mew-starttls-get-param proto :success t)
-		       :starttls-function
-		       (mew-starttls-get-param proto :starttls-function nil)))
+	    (let ((args (list name buf server port
+			      :type type
+			      :return-list t
+			      :nowait nowait)))
+	      (when starttlsp
+		(setq args
+		      (append args
+			      (list
+			       :always-query-capabilities
+			       (mew-starttls-get-param
+				proto :always-query-capabilities nil)
+			       :capability-command
+			       (mew-starttls-get-param
+				proto :capability-command t)
+			       :end-of-capability
+			       (mew-starttls-get-param
+				proto :end-of-capability t)
+			       :end-of-command
+			       (mew-starttls-get-param
+				proto :end-of-command t)
+			       :success
+			       (mew-starttls-get-param
+				proto :success t)
+			       :starttls-function
+			       (mew-starttls-get-param
+				proto :starttls-function nil)))))
+	      (setq pro (apply #'open-network-stream args)))
 	    (advice-remove 'gnutls-negotiate
 			   #'mew--advice-filter-args-gnutls-negotiate)
 	    ;;
