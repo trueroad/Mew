@@ -562,6 +562,11 @@
 				:status-msg
 				(concat status-msg "FAILED"))))
 	       (t
+		(when (and sslnp starttlsp)
+		  (mew-smtp-debug "*GREETING*"
+				  (plist-get (cdr pro) :greeting))
+		  (mew-smtp-debug "*CAPABILITIES*"
+				  (plist-get (cdr pro) :capabilities)))
 		(setq pro (list
 			   (car pro)
 			   :error nil))
@@ -603,11 +608,6 @@
 	  (message "Connecting to the SMTP server...")
 	  (setq pro (mew-open-network-stream pnm nil server sprt
 					     'smtp sslnp starttlsp case))
-	  (when (and sslnp starttlsp)
-	    (mew-smtp-debug "*GREETING*"
-			    (plist-get (cdr pro) :greeting))
-	    (mew-smtp-debug "*CAPABILITIES*"
-			    (plist-get (cdr pro) :capabilities)))
 	  (setq pro (car pro))
 	  (when (not (processp pro)) (signal 'quit nil))
 	  (mew-process-silent-exit pro)
