@@ -487,11 +487,13 @@
       (set-process-filter process 'mew-imap2-filter)
       (message "Copying in background...")
       (when (and sslnp starttlsp)
-	;; open-network-stream requires a client-initiated command after the
-	;; session is upgraded to use TLS because
-	;; no additional greeting from the server.
-	(mew-imap2-set-status pnm "capability")
-	(mew-imap2-command-capability process pnm))
+	;; open-network-stream receives IMAP greeting in its internals
+	;; and passes it as a return value.
+	;; We store the value in the variable mew--gnutls-imap-greeting
+	;; and pass it to the filter to process the greeting.
+	(mew-imap2-filter process
+			 (string-replace "\r\n" "\n"
+					 mew--gnutls-imap-greeting)))
       )))
 
 (defun mew-summary-from-local-to-imap ()
