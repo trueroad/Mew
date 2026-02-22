@@ -542,6 +542,7 @@
 	    ;;
 	    (let ((plainp (eq 'plain (plist-get (cdr pro) :type)))
 		  (greeting (plist-get (cdr pro) :greeting))
+		  (capabilities (plist-get (cdr pro) :capabilities))
 		  (openp  (and (car pro)
 			       (eq 'open (process-status (car pro)))))
 		  ;; Falling back to a plain connection is allowed
@@ -564,9 +565,13 @@
 	       (t
 		(when (and sslnp starttlsp)
 		  (mew-smtp-debug "*GREETING*"
-				  (plist-get (cdr pro) :greeting))
+				  (if greeting
+				      (string-replace "\r\n" "\n"
+						      greeting)))
 		  (mew-smtp-debug "*CAPABILITIES*"
-				  (plist-get (cdr pro) :capabilities)))
+				  (if capabilities
+				      (string-replace "\r\n" "\n"
+						      capabilities))))
 		(setq pro (list
 			   (car pro)
 			   :error nil))
