@@ -571,6 +571,8 @@
 			   (car pro)
 			   :error nil))
 		(cond
+		 ((eq proto 'smtp)
+		  (setq mew--gnutls-smtp-greeting greeting))
 		 ((eq proto 'pop)
 		  (setq mew--gnutls-pop-greeting greeting))
 		 ((eq proto 'imap)
@@ -633,6 +635,8 @@
 ;;;
 ;;; Launcher
 ;;;
+
+(defvar mew--gnutls-smtp-greeting nil)
 
 (defun mew-smtp-send-message (case qfld msgs &optional fallbacked)
   (let ((server (mew-smtp-server case))
@@ -736,11 +740,13 @@
       (message "Sending in background...")
       ;;
       (when (and sslnp starttlsp)
-	;; open-network-stream requires a client-initiated command after the
-	;; session is upgraded to use TLS because
-	;; no additional greeting from the server.
-	(mew-smtp-set-status pnm "ehlo")
-	(mew-smtp-command-ehlo process pnm)))))
+	;; open-network-stream receives SMTP greeting in its internals
+	;; and passes it as a return value.
+	;; We store the value in the variable mew--gnutls-smtp-greeting
+	;; and pass it to the filter to process the greeting.
+	(mew-smtp-filter process
+			 (string-replace "\r\n" "\n"
+					 mew--gnutls-smtp-greeting))))))
 
 (defun mew-smtp-flush-queue (case &optional qfld)
   (let (msgs)
