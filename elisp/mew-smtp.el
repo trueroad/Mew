@@ -512,17 +512,29 @@
 		       :return-list t
 		       :nowait nowait
 		       :always-query-capabilities
-		       (mew-starttls-get-param proto :always-query-capabilities nil)
+		       (and starttlsp
+			    (mew-starttls-get-param
+			     proto :always-query-capabilities nil))
 		       :capability-command
-		       (mew-starttls-get-param proto :capability-command t)
+		       (and starttlsp
+			    (mew-starttls-get-param
+			     proto :capability-command t))
 		       :end-of-capability
-		       (mew-starttls-get-param proto :end-of-capability t)
+		       (and starttlsp
+			    (mew-starttls-get-param
+			     proto :end-of-capability t))
 		       :end-of-command
-		       (mew-starttls-get-param proto :end-of-command t)
+		       (and starttlsp
+			    (mew-starttls-get-param
+			     proto :end-of-command t))
 		       :success
-		       (mew-starttls-get-param proto :success t)
+		       (and starttlsp
+			    (mew-starttls-get-param
+			     proto :success t))
 		       :starttls-function
-		       (mew-starttls-get-param proto :starttls-function nil)))
+		       (and starttlsp
+			    (mew-starttls-get-param
+			     proto :starttls-function nil))))
 	    (advice-remove 'gnutls-negotiate
 			   #'mew--advice-filter-args-gnutls-negotiate)
 	    ;;
@@ -723,9 +735,9 @@
       (set-process-filter process 'mew-smtp-filter)
       (message "Sending in background...")
       ;;
-      (when sslnp
-	;; GnuTLS requires a client-initiated command after the
-	;; session is established or upgraded to use TLS because
+      (when (and sslnp starttlsp)
+	;; open-network-stream requires a client-initiated command after the
+	;; session is upgraded to use TLS because
 	;; no additional greeting from the server.
 	(mew-smtp-set-status pnm "ehlo")
 	(mew-smtp-command-ehlo process pnm)))))
